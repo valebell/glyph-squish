@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="forms"
+        android:icon="@drawable/ic_shortcut_forms"
+        android:shortcutShortLabel="@string/form_gallery_title">
+        <intent
+            android:action="com.valebell.glyphsquish.OPEN_FORMS"
+            android:targetPackage="com.valebell.glyphsquish"
+            android:targetClass="com.valebell.glyphsquish.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="moves"
+        android:icon="@drawable/ic_shortcut_moves"
+        android:shortcutShortLabel="@string/move_gallery_title">
+        <intent
+            android:action="com.valebell.glyphsquish.OPEN_MOVES"
+            android:targetPackage="com.valebell.glyphsquish"
+            android:targetClass="com.valebell.glyphsquish.MainActivity" />
+    </shortcut>
+</shortcuts>

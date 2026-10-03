@@ -1,0 +1,10 @@
+<resources>
+    <style name="Theme.Squish" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowBackground">@color/squish_background</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:navigationBarColor">@color/transparent</item>
+        <item name="android:statusBarColor">@color/transparent</item>
+    </style>
+</resources>

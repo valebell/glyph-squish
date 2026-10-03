@@ -1,0 +1,95 @@
+<resources>
+    <string name="app_name" translatable="false">Glyph Squish</string>
+    <string name="compatibility_title">Hey! I’m Squish.</string>
+    <string name="compatibility_requirement">Only on Nothing Phone (3)</string>
+    <string name="compatibility_explanation">I live on its Glyph Matrix, so I can’t move in on this phone.</string>
+    <string name="compatibility_close">Close</string>
+    <string name="compatibility_squish_description" translatable="false">Squish</string>
+    <string name="compatibility_replay">Play Burst</string>
+    <string name="matrix_label">Live Glyph preview</string>
+    <string name="preview_hint">Tilt, shake, squish!</string>
+    <string name="settings_help_section">Help</string>
+    <string name="settings_how_to_play">How to play</string>
+    <string name="controls_glyph_context">With Glyph Squish active on your Glyph Matrix:</string>
+    <string name="controls_move">Move</string>
+    <string name="controls_move_description">Tilt your phone to move Squish.</string>
+    <string name="controls_form">Change form</string>
+    <string name="controls_form_description">Shake to cycle through unlocked forms.</string>
+    <string name="controls_squish">Squish</string>
+    <string name="controls_squish_description">Hold the Glyph Button to squish and play your selected move.</string>
+    <string name="help_close">Got it</string>
+    <string name="matrix_preview_description">Live preview of the %1$s form</string>
+    <string name="preview_identity_format" translatable="false">%1$s / %2$s</string>
+    <string name="creature_loading">Waking Squish&#8230;</string>
+    <string name="retry">Retry</string>
+
+    <string name="form_blob">Blob</string>
+    <string name="form_shark">Shark</string>
+    <string name="form_cat">Cat</string>
+    <string name="form_star">Star</string>
+    <string name="form_butterfly">Butterfly</string>
+
+    <string name="button_action_burst">Burst</string>
+    <string name="button_action_helix">Helix</string>
+    <string name="button_action_echo">Echo</string>
+    <string name="button_action_ricochet">Ricochet</string>
+    <string name="button_action_thunderbolt">Thunderbolt</string>
+    <string name="button_action_burst_description">Burst into pixels, then spiral home</string>
+    <string name="button_action_helix_description">Coil into an accelerating corkscrew</string>
+    <string name="button_action_echo_description">Launch a luminous ring, then surf it home</string>
+    <string name="button_action_ricochet_description">Strike the wall and spring home</string>
+    <string name="button_action_thunderbolt_description">Zigzag, explode, and flash the Glyph</string>
+    <string name="button_action_helix_recipe">Complete two circles around the rim in a row</string>
+    <string name="button_action_echo_recipe">Bounce between opposite edges: left, right, left, right, or top, bottom, top, bottom</string>
+    <string name="button_action_ricochet_recipe">Cross the same diagonal twice</string>
+    <string name="button_action_thunderbolt_recipe">Bounce between opposite edges, hold the Glyph Button, then circle the rim after your move finishes</string>
+
+    <string name="open_glyph_toys" translatable="false">Glyph Toys</string>
+    <string name="open_settings">Settings</string>
+    <string name="glyph_toys_unavailable">Couldn’t open Glyph Toys. Go to Settings → Glyph Interface → Glyph Toys on your phone.</string>
+    <string name="toy_name" translatable="false">Glyph Squish</string>
+    <string name="toy_summary">A Glyph creature with unlockable moves and forms</string>
+
+    <string name="form_gallery_title">Forms</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_back">Back to Glyph Squish</string>
+    <string name="settings_feedback_section">Feedback</string>
+    <string name="settings_sound">Sound</string>
+    <string name="feedback_settings_error">Could not access your feedback settings</string>
+    <string name="settings_sound_description">Play sounds on interaction</string>
+    <string name="settings_vibration">Vibration</string>
+    <string name="settings_vibration_description">Vibrate on interaction</string>
+    <string name="settings_glyph_section" translatable="false">Glyph</string>
+    <string name="settings_glyph_description">Add or manage Glyph Squish in system settings</string>
+    <string name="settings_about_section">About</string>
+    <string name="settings_version">Version</string>
+    <string name="show_forms">Show forms</string>
+    <plurals name="form_gallery_discovered_format">
+        <item quantity="one">%1$d of %2$d unlocked</item>
+        <item quantity="other">%1$d of %2$d unlocked</item>
+    </plurals>
+    <string name="form_gallery_current_badge">Selected</string>
+    <string name="form_gallery_status_locked_format">Unlock %1$s to reveal</string>
+    <string name="form_gallery_card_description_unlocked_format">%1$s form</string>
+    <string name="form_gallery_card_description_locked_format">%1$s form, locked. %2$s.</string>
+
+    <string name="move_gallery_title">Moves</string>
+    <string name="move_gallery_unlock_hint">Unlock moves by performing these gestures on the Glyph Matrix on the back of your phone</string>
+    <string name="show_moves">Show moves</string>
+    <plurals name="move_gallery_unlocked_format">
+        <item quantity="one">%1$d of %2$d unlocked</item>
+        <item quantity="other">%1$d of %2$d unlocked</item>
+    </plurals>
+    <string name="move_gallery_replay">Replay move</string>
+    <string name="move_gallery_selected_badge">Selected</string>
+    <string name="move_gallery_locked_badge">Locked</string>
+    <string name="move_gallery_card_unlocked_description">%1$s move. %2$s.</string>
+    <string name="move_gallery_card_recipe_description">%1$s move. %2$s. Recipe: %3$s.</string>
+    <string name="move_gallery_card_locked_description">%1$s move, locked. %2$s. Recipe: %3$s.</string>
+    <string name="select_form_action">Use form</string>
+    <string name="select_move_action">Select move</string>
+    <string name="load_error">Could not load Squish</string>
+    <string name="save_error">Could not save your changes</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="form_gallery_new_description">New</string>
+</resources>

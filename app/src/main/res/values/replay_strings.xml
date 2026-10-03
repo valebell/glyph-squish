@@ -1,0 +1,4 @@
+<resources>
+    <string name="move_gallery_playing">Playing move</string>
+    <string name="move_gallery_replay_ready">Ready to replay</string>
+</resources>

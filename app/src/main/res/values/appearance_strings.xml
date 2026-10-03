@@ -1,0 +1,6 @@
+<resources>
+    <string name="settings_appearance_section">Appearance</string>
+    <string name="settings_device_colors">Use device colors</string>
+    <string name="settings_device_colors_description">Match your wallpaper and device theme</string>
+    <string name="appearance_settings_error">Could not load or save your appearance settings</string>
+</resources>
