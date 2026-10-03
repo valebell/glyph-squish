@@ -1,0 +1,156 @@
+name: Build APKs
+
+on:
+  pull_request:
+    branches: [dev, 'release/**']
+  push:
+    branches: [dev, 'release/**']
+  create:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Check and build
+    if: >-
+      github.event.deleted != true &&
+      (github.event_name != 'create' ||
+      (github.event.ref_type == 'branch' && startsWith(github.event.ref, 'release/')))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    outputs:
+      unsigned-apk-artifact-id: ${{ steps.release-apk.outputs.artifact-id }}
+      release-version: ${{ steps.release-version.outputs.version }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Java
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '25'
+          check-latest: true
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+        with:
+          packages: 'platform-tools platforms;android-37 build-tools;36.0.0'
+          log-accepted-android-sdk-licenses: false
+
+      - name: Set up Gradle and validate its wrapper
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+        with:
+          cache-provider: basic
+          cache-read-only: ${{ github.event_name == 'pull_request' || github.ref != 'refs/heads/dev' }}
+
+      - name: Fetch verified Glyph SDK
+        run: python3 tools/fetch_glyph_sdk.py
+
+      - name: Test version automation
+        run: python3 -B -m unittest discover -s tools -p 'test_*.py'
+
+      - name: Check code, run unit tests, and build APKs
+        run: >-
+          ./gradlew --no-daemon --stacktrace
+          ktlintCheck detekt testDebugUnitTest lintDebug lintRelease
+          assembleDebug assembleRelease assembleDebugAndroidTest
+
+      - name: Check release branch and APK version
+        id: release-version
+        if: github.event_name != 'pull_request' && startsWith(github.ref, 'refs/heads/release/')
+        env:
+          RELEASE_BRANCH: ${{ github.ref_name }}
+        run: python3 tools/check_release_version.py "$RELEASE_BRANCH"
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: glyph-squish-debug-${{ github.run_id }}-${{ github.run_attempt }}
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+
+      - name: Upload unsigned release APK
+        id: release-apk
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: glyph-squish-release-unsigned-${{ github.run_id }}-${{ github.run_attempt }}
+          path: app/build/outputs/apk/release/app-release-unsigned.apk
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+
+      - name: Upload test and analysis reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: glyph-squish-reports-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            app/build/reports/
+            app/build/test-results/
+            app/build/outputs/mapping/release/mapping.txt
+          if-no-files-found: ignore
+          retention-days: 14
+
+  sign:
+    name: Sign release APK
+    needs: build
+    if: github.event_name != 'pull_request' && startsWith(github.ref, 'refs/heads/release/')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      # Only the reviewed signing helper runs here; no Gradle or dependency caches.
+      - name: Check out signing helper
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: tools/sign_apk.py
+          sparse-checkout-cone-mode: false
+
+      - name: Download this build's unsigned APK
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          artifact-ids: ${{ needs.build.outputs.unsigned-apk-artifact-id }}
+          path: unsigned
+          merge-multiple: true
+
+      - name: Set up Java
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '25'
+          check-latest: true
+
+      - name: Set up signing tools
+        uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+        with:
+          packages: 'build-tools;36.0.0'
+          log-accepted-android-sdk-licenses: false
+
+      - name: Sign and verify APK
+        env:
+          RELEASE_VERSION: ${{ needs.build.outputs.release-version }}
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: python3 tools/sign_apk.py unsigned/app-release-unsigned.apk --version "$RELEASE_VERSION"
+
+      - name: Upload signed APK and checksum
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: glyph-squish-signed-${{ github.run_id }}-${{ github.run_attempt }}
+          path: dist/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
