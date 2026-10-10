@@ -2,7 +2,6 @@ package com.valebell.glyphsquish.slime
 
 import android.animation.ValueAnimator
 import android.app.Service
-import android.content.ComponentName
 import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
@@ -28,7 +27,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-class SlimeToyService : Service() {
+class SlimeToyService :
+    Service(),
+    GlyphMatrixSessionCallbacks {
     private val mainHandler = Handler(Looper.getMainLooper())
     private var glyphMatrixManager: GlyphMatrixManager? = null
     private var engine = SlimeEngine(shadeBody = false)
@@ -81,34 +82,33 @@ class SlimeToyService : Service() {
 
     private val serviceMessenger = Messenger(glyphEventHandler)
 
-    private val managerCallback =
-        object : GlyphMatrixManager.Callback {
-            override fun onServiceConnected(componentName: ComponentName?) {
-                if (!sessionActive) return
-                val manager = glyphMatrixManager ?: return
+    private var callbackBridge: GlyphMatrixCallbackBridge? = null
 
-                frameDelivery.reset()
-                try {
-                    if (!manager.register(Glyph.DEVICE_23112)) {
-                        Log.e(LOG_TAG, "Phone (3) registration was rejected")
-                        stopRendering()
-                        return
-                    }
-                    matrixReady = true
-                    idleBrightness.reset(SystemClock.uptimeMillis())
-                    motionSensor.start()
-                    lastFrameTime = 0L
-                    mainHandler.post(frameLoop)
-                } catch (error: GlyphException) {
-                    handleMatrixFailure("Unable to register Phone (3)", error)
-                }
-            }
+    override fun onGlyphServiceConnected() {
+        if (!sessionActive) return
+        val manager = glyphMatrixManager ?: return
 
-            override fun onServiceDisconnected(componentName: ComponentName?) {
+        frameDelivery.reset()
+        try {
+            if (!manager.register(Glyph.DEVICE_23112)) {
+                Log.e(LOG_TAG, "Phone (3) registration was rejected")
                 stopRendering()
-                Log.w(LOG_TAG, "Glyph Matrix service disconnected")
+                return
             }
+            matrixReady = true
+            idleBrightness.reset(SystemClock.uptimeMillis())
+            motionSensor.start()
+            lastFrameTime = 0L
+            mainHandler.post(frameLoop)
+        } catch (error: GlyphException) {
+            handleMatrixFailure("Unable to register Phone (3)", error)
         }
+    }
+
+    override fun onGlyphServiceDisconnected() {
+        stopRendering()
+        Log.w(LOG_TAG, "Glyph Matrix service disconnected")
+    }
 
     private val frameLoop = Runnable(::sendNextFrame)
 
@@ -135,7 +135,9 @@ class SlimeToyService : Service() {
                 Log.e(LOG_TAG, "Glyph Matrix manager is unavailable")
             } else {
                 glyphMatrixManager = manager
-                manager.init(managerCallback)
+                val bridge = GlyphMatrixCallbackBridge(this)
+                callbackBridge = bridge
+                manager.init(bridge)
             }
         }
         collectRuntime()
@@ -292,6 +294,7 @@ class SlimeToyService : Service() {
         stopRendering()
 
         glyphMatrixManager?.let { manager ->
+            callbackBridge?.detach()
             try {
                 manager.turnOff()
             } catch (error: GlyphException) {
@@ -300,6 +303,7 @@ class SlimeToyService : Service() {
             manager.unInit()
         }
         glyphMatrixManager = null
+        callbackBridge = null
         displayedCreature = null
         launcherIconSync().setGlyphActive(false)
     }
