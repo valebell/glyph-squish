@@ -17,6 +17,7 @@ class SquishViewModel(
 ) : ViewModel() {
     val uiState: StateFlow<CreatureRuntimeState> = runtime.state
     val persistenceErrors = runtime.persistenceErrors
+    val pendingSaveFailure: StateFlow<Long?> = runtime.pendingSaveFailure
 
     fun markFormsSeen(forms: Set<CreatureForm>) = runtime.markFormsSeen(forms)
 

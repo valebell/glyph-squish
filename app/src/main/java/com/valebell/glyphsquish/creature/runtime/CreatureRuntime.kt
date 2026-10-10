@@ -42,9 +42,13 @@ class CreatureRuntime(
     override val persistenceErrors: SharedFlow<CreaturePersistenceError> =
         mutablePersistenceErrors.asSharedFlow()
 
+    private val mutablePendingSaveFailure = MutableStateFlow<Long?>(null)
+    override val pendingSaveFailure: StateFlow<Long?> = mutablePendingSaveFailure.asStateFlow()
+
     private var session: CreatureSession? = null
     private var loadInProgress = false
     private var lastFormCycleMillis = Long.MIN_VALUE
+    private var saveFailureSerial = 0L
     private val saveMutex = Mutex()
 
     init {
@@ -192,12 +196,15 @@ class CreatureRuntime(
                 try {
                     scope.ensureActive()
                     repository.save(state)
+                    // A successful save persists the full state, so it also covers
+                    // every earlier failed attempt: nothing is pending anymore.
+                    mutablePendingSaveFailure.value = null
                 } catch (error: CancellationException) {
                     throw error
                 } catch (error: SQLiteException) {
-                    emitPersistenceError("Unable to save Squish", error)
+                    failSave("Unable to save Squish", error)
                 } catch (error: IllegalStateException) {
-                    emitPersistenceError("Character state changed unexpectedly", error)
+                    failSave("Character state changed unexpectedly", error)
                 }
             }
         }
@@ -210,6 +217,16 @@ class CreatureRuntime(
         session = null
         loadInProgress = false
         mutableState.value = CreatureRuntimeState.LoadFailed(errorMessage(message, error))
+    }
+
+    private fun failSave(
+        message: String,
+        error: Exception,
+    ) {
+        // Retain the failure until a save succeeds; the serial lets the UI tell
+        // a new failure apart from one the user already dismissed or retried.
+        mutablePendingSaveFailure.value = ++saveFailureSerial
+        emitPersistenceError(message, error)
     }
 
     private fun emitPersistenceError(

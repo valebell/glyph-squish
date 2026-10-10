@@ -82,12 +82,13 @@ internal fun SquishApp(
             onShortcutHandled()
         }
     }
-    var hasSaveError by rememberSaveable { mutableStateOf(false) }
+    // The runtime retains the failure until a save succeeds, so the card also
+    // appears when the save failed before this screen started collecting.
+    val pendingSaveFailure by viewModel.pendingSaveFailure.collectAsStateWithLifecycle()
+    var dismissedSaveFailure by rememberSaveable { mutableStateOf<Long?>(null) }
+    val hasSaveError = pendingSaveFailure != null && pendingSaveFailure != dismissedSaveFailure
     val animationsEnabled = ValueAnimator.areAnimatorsEnabled()
     val layoutDirection = LocalLayoutDirection.current
-    LaunchedEffect(viewModel) {
-        viewModel.persistenceErrors.collect { hasSaveError = true }
-    }
     BackHandler(enabled = screen == SquishScreen.SETTINGS) {
         screen = SquishScreen.HOME
     }
@@ -105,12 +106,12 @@ internal fun SquishApp(
                     Row {
                         TextButton(onClick = {
                             playFeedback(GlyphSoundEffect.SELECT)
-                            hasSaveError = false
+                            dismissedSaveFailure = pendingSaveFailure
                             viewModel.retrySave()
                         }) { Text(stringResource(R.string.retry)) }
                         TextButton(onClick = {
                             playFeedback(GlyphSoundEffect.SELECT)
-                            hasSaveError = false
+                            dismissedSaveFailure = pendingSaveFailure
                         }) { Text(stringResource(R.string.dismiss)) }
                     }
                 }

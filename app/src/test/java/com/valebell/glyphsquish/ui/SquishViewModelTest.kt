@@ -89,6 +89,16 @@ class SquishViewModelTest {
         }
 
     @Test
+    fun `pending save failure survives without a collector and is exposed to late screens`() {
+        val runtime = FakeCreatureRuntime()
+        val viewModel = SquishViewModel(runtime)
+
+        runtime.mutablePendingSaveFailure.value = 1L
+
+        assertEquals(1L, viewModel.pendingSaveFailure.value)
+    }
+
+    @Test
     fun `selection actions preserve runtime results`() {
         val runtime = FakeCreatureRuntime(CreatureRuntimeState.Ready(CreatureProgression.initialState()))
         val viewModel = SquishViewModel(runtime)
@@ -112,6 +122,9 @@ private class FakeCreatureRuntime(
 
     val mutablePersistenceErrors = MutableSharedFlow<CreaturePersistenceError>()
     override val persistenceErrors: SharedFlow<CreaturePersistenceError> = mutablePersistenceErrors
+
+    val mutablePendingSaveFailure = MutableStateFlow<Long?>(null)
+    override val pendingSaveFailure: StateFlow<Long?> = mutablePendingSaveFailure
 
     var retryCount = 0
     var interactionResult: SlimeButtonAction? = null

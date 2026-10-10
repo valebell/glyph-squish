@@ -24,6 +24,9 @@ class FakeCreatureRuntime : CreatureRuntimeContract {
     val mutablePersistenceErrors = MutableSharedFlow<CreaturePersistenceError>(extraBufferCapacity = 1)
     override val persistenceErrors: SharedFlow<CreaturePersistenceError> = mutablePersistenceErrors
 
+    val mutablePendingSaveFailure = MutableStateFlow<Long?>(null)
+    override val pendingSaveFailure: StateFlow<Long?> = mutablePendingSaveFailure
+
     var saveRetryCount = 0
 
     override fun retrySave() {
