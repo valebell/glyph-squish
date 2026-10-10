@@ -206,7 +206,9 @@ class GalleryLayoutTest : SquishUiTestFixture() {
         composeRule.onNodeWithContentDescription("Show moves").performClick()
         advanceUi()
         scrollGalleryTo("move-THUNDERBOLT")
-        assertTextFits("Bounce between opposite edges, hold the Glyph Button, then circle the rim after your move finishes")
+        assertTextFits(
+            "Bounce between opposite edges, hold the Glyph Button, then circle the rim after your move finishes",
+        )
     }
 
     private fun assertTextFits(text: String) {
