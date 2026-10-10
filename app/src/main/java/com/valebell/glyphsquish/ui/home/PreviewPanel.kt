@@ -39,6 +39,7 @@ import com.valebell.glyphsquish.descriptionResource
 import com.valebell.glyphsquish.nameResource
 import com.valebell.glyphsquish.slime.SlimePhenotype
 import com.valebell.glyphsquish.ui.components.SectionLabel
+import com.valebell.glyphsquish.ui.slime.MatrixAnimation
 import com.valebell.glyphsquish.ui.slime.SlimeMatrix
 import com.valebell.glyphsquish.ui.slime.SlimeMatrixState
 import com.valebell.glyphsquish.ui.theme.LocalPreviewColors
@@ -193,6 +194,9 @@ private fun PreviewMatrix(
             ),
         modifier = Modifier.size(previewSize),
         interactive = true,
+        // HomeRoute steps this state so playback keeps advancing while the
+        // panel is scrolled out of the lazy gallery.
+        animation = MatrixAnimation(running = false),
     )
 }
 

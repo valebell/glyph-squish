@@ -230,7 +230,7 @@ private const val FRAME_INTERVAL_NANOS = 33_000_000L
 private const val FRAME_INTERVAL_SECONDS = 0.033f
 private const val NANOS_PER_SECOND = 1_000_000_000f
 
-private suspend fun SlimeMatrixState.animateFrames() {
+internal suspend fun SlimeMatrixState.animateFrames() {
     var lastStepNanos = 0L
     while (currentCoroutineContext().isActive) {
         withFrameNanos { frameNanos ->
