@@ -17,6 +17,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.platform.app.InstrumentationRegistry
+import com.valebell.glyphsquish.BuildConfig
 import com.valebell.glyphsquish.slime.SlimeButtonAction
 import com.valebell.glyphsquish.ui.audio.GlyphSoundEffect
 import com.valebell.glyphsquish.ui.home.HomeRoute
@@ -165,7 +166,7 @@ class SquishAppTest : SquishUiTestFixture() {
         composeRule.onNodeWithContentDescription("Settings").performClick()
         advanceUi()
         composeRule.onNodeWithText("Version").performScrollTo().assertIsDisplayed()
-        composeRule.onNodeWithText("1.0").assertIsDisplayed()
+        composeRule.onNodeWithText(BuildConfig.VERSION_NAME).assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Back to Glyph Squish").performClick()
         composeRule.waitUntil(5_000) {
             advanceUi()
