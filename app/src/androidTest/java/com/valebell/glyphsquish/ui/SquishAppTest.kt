@@ -17,7 +17,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.platform.app.InstrumentationRegistry
-import com.valebell.glyphsquish.creature.runtime.CreaturePersistenceError
 import com.valebell.glyphsquish.slime.SlimeButtonAction
 import com.valebell.glyphsquish.ui.audio.GlyphSoundEffect
 import com.valebell.glyphsquish.ui.home.HomeRoute
@@ -208,18 +207,33 @@ class SquishAppTest : SquishUiTestFixture() {
     @Test
     fun saveErrorsUseAnInlineRetryAndDismissCard() {
         val runtime = setContent()
-        composeRule.runOnIdle { runtime.mutablePersistenceErrors.tryEmit(CreaturePersistenceError("failed")) }
+        composeRule.runOnIdle { runtime.mutablePendingSaveFailure.value = 1L }
         advanceUi()
         composeRule.onNodeWithText("Could not save your changes").assertIsDisplayed()
         composeRule.onNodeWithText("Retry").performClick()
         advanceUi()
         assertEquals(1, runtime.saveRetryCount)
         composeRule.onNodeWithText("Could not save your changes").assertDoesNotExist()
-        composeRule.runOnIdle { runtime.mutablePersistenceErrors.tryEmit(CreaturePersistenceError("still failed")) }
+        // A successful retry clears the pending failure; a later failure is new.
+        composeRule.runOnIdle { runtime.mutablePendingSaveFailure.value = null }
         advanceUi()
+        composeRule.runOnIdle { runtime.mutablePendingSaveFailure.value = 2L }
+        advanceUi()
+        composeRule.onNodeWithText("Could not save your changes").assertIsDisplayed()
         composeRule.onNodeWithText("Dismiss").performClick()
         advanceUi()
         composeRule.onNodeWithText("Could not save your changes").assertDoesNotExist()
+    }
+
+    @Test
+    fun saveFailureFromBeforeTheScreenOpenedStillShowsTheRetryCard() {
+        val runtime = FakeCreatureRuntime()
+        runtime.mutablePendingSaveFailure.value = 1L
+        setContent(initialRuntime = runtime)
+        composeRule.onNodeWithText("Could not save your changes").assertIsDisplayed()
+        composeRule.onNodeWithText("Retry").performClick()
+        advanceUi()
+        assertEquals(1, runtime.saveRetryCount)
     }
 
     @Test

@@ -30,6 +30,13 @@ interface CreatureRuntimeContract {
     val state: StateFlow<CreatureRuntimeState>
     val persistenceErrors: SharedFlow<CreaturePersistenceError>
 
+    /**
+     * Serial of the save failure whose changes are not yet persisted; null once a save
+     * succeeds. Unlike [persistenceErrors] it survives until collected, so a save that
+     * failed during Glyph-only play still surfaces when the companion opens.
+     */
+    val pendingSaveFailure: StateFlow<Long?>
+
     fun retrySave()
 
     fun retryLoad()

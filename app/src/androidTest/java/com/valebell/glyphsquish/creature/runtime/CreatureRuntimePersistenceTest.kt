@@ -71,6 +71,34 @@ class CreatureRuntimePersistenceTest {
 
             assertEquals(listOf(3L, 4L, 4L), repository.attemptedRevisions)
             assertEquals((runtime.state.value as CreatureRuntimeState.Ready).creature, repository.stored)
+            assertEquals(null, runtime.pendingSaveFailure.value)
+        }
+
+    @Test
+    fun saveFailureIsRetainedUntilAPersistSucceeds() =
+        onMain {
+            val repository = SuspendedRepository(failAllSaves = true)
+            val runtime = CreatureRuntime(repository, scope)
+            runtime.selectForm(CreatureForm.BUTTERFLY)
+            repository.resumeSave.complete(Unit)
+            scope.coroutineContext.job.children
+                .toList()
+                .joinAll()
+            assertEquals(1L, runtime.pendingSaveFailure.value)
+
+            runtime.selectForm(CreatureForm.BLOB)
+            scope.coroutineContext.job.children
+                .toList()
+                .joinAll()
+            assertEquals(2L, runtime.pendingSaveFailure.value)
+
+            repository.failAllSaves = false
+            runtime.retrySave()
+            scope.coroutineContext.job.children
+                .toList()
+                .joinAll()
+            assertEquals(null, runtime.pendingSaveFailure.value)
+            assertEquals((runtime.state.value as CreatureRuntimeState.Ready).creature, repository.stored)
         }
 
     @Test
@@ -129,6 +157,7 @@ class CreatureRuntimePersistenceTest {
 
     private class SuspendedRepository(
         private val failFirstSave: Boolean = false,
+        var failAllSaves: Boolean = false,
     ) : CreatureRepository {
         var stored = CreatureProgression.unlockMove(CreatureProgression.initialState(), SlimeButtonAction.HELIX)
         val attemptedRevisions = mutableListOf<Long>()
@@ -142,6 +171,7 @@ class CreatureRuntimePersistenceTest {
                 resumeSave.await()
                 if (failFirstSave) throw SQLiteException("Test save failure")
             }
+            if (failAllSaves) throw SQLiteException("Test save failure")
             stored = state
         }
     }
