@@ -72,7 +72,7 @@ jobs:
         run: python3 tools/check_release_version.py "$RELEASE_BRANCH"
 
       - name: Upload debug APK
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: glyph-squish-debug-${{ github.run_id }}-${{ github.run_attempt }}
           path: app/build/outputs/apk/debug/app-debug.apk
@@ -82,7 +82,7 @@ jobs:
 
       - name: Upload unsigned release APK
         id: release-apk
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: glyph-squish-release-unsigned-${{ github.run_id }}-${{ github.run_attempt }}
           path: app/build/outputs/apk/release/app-release-unsigned.apk
@@ -92,7 +92,7 @@ jobs:
 
       - name: Upload test and analysis reports
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: glyph-squish-reports-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
@@ -118,7 +118,7 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Download this build's unsigned APK
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           artifact-ids: ${{ needs.build.outputs.unsigned-apk-artifact-id }}
           path: unsigned
@@ -147,7 +147,7 @@ jobs:
         run: python3 tools/sign_apk.py unsigned/app-release-unsigned.apk --version "$RELEASE_VERSION"
 
       - name: Upload signed APK and checksum
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: glyph-squish-signed-${{ github.run_id }}-${{ github.run_attempt }}
           path: dist/
