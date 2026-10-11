@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.contentDescription
@@ -71,16 +72,22 @@ internal fun MatrixCanvas(
         val cellSize = gridDiameter / SlimeEngine.MATRIX_SIZE
         val gridLeft = center.x - gridDiameter / 2f + cellSize / 2f
         val gridTop = center.y - gridDiameter / 2f + cellSize / 2f
-        val pixelRadius = cellSize * PIXEL_RADIUS_FACTOR
+        val pixelSize = cellSize * PIXEL_SIZE_FACTOR
+        val pixelHalfSize = pixelSize / 2f
         MATRIX_PIXEL_INDICES.forEach { index ->
             val x = index % SlimeEngine.MATRIX_SIZE
             val y = index / SlimeEngine.MATRIX_SIZE
             val brightness = pixels[index]
             if (!drawOffPixels && brightness <= 0) return@forEach
-            drawCircle(
+            val topLeft =
+                Offset(
+                    gridLeft + x * cellSize - pixelHalfSize,
+                    gridTop + y * cellSize - pixelHalfSize,
+                )
+            drawRect(
                 color = pixelColor(brightness),
-                radius = pixelRadius,
-                center = Offset(gridLeft + x * cellSize, gridTop + y * cellSize),
+                topLeft = topLeft,
+                size = Size(pixelSize, pixelSize),
             )
         }
     }
@@ -99,6 +106,8 @@ private fun pixelColor(brightness: Int): Color {
 private const val PANEL_RADIUS_FACTOR = 0.49f
 private const val PANEL_STROKE_FACTOR = 0.006f
 private const val GRID_SCALE = 0.92f
-private const val PIXEL_RADIUS_FACTOR = 0.31f
+
+// LED side over cell pitch, matching the square LEDs of the Phone (3) spec SVG (13.05 / 17.79).
+private const val PIXEL_SIZE_FACTOR = 13.05f / ((440f - 13.05f) / 24f)
 private const val OFF_PIXEL_CHANNEL = 0x25
 private val OffPixelColor = Color(0xFF252523)
