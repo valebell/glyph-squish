@@ -13,10 +13,10 @@ ksp = "2.3.14"
 # Keep the Kotlin Gradle plugin and Compose compiler on the same release.
 kotlin = "2.4.21"
 activityCompose = "1.13.0"
-composeBom = "2026.09.00"
-material3 = "1.5.0-rc01"
+composeBom = "2026.11.01"
+material3 = "1.5.0"
 coroutines = "1.11.0"
-lifecycle = "2.11.0"
+lifecycle = "2.11.1"
 
 [libraries]
 androidx-concurrent-futures = { group = "androidx.concurrent", name = "concurrent-futures", version.ref = "concurrent" }
